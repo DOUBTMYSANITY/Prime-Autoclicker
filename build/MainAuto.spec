@@ -2,11 +2,18 @@
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules, collect_all
 
-ROOT = Path(SPECPATH).resolve().parent.parent
+ROOT = Path(SPECPATH).resolve().parent
 
-datas = [
-    (str(ROOT / "plugins" / "Phasmo" / "Maps" / "cache"), "plugins/Phasmo/Maps/cache"),
-]
+datas = []
+_plugins = ROOT / "plugins"
+_assets = ROOT / "assets"
+if _plugins.is_dir():
+    datas.append((str(_plugins), "plugins"))
+if _assets.is_dir():
+    datas.append((str(_assets), "assets"))
+_maps_cache = ROOT / "plugins" / "Phasmo" / "Maps" / "cache"
+if _maps_cache.is_dir():
+    datas.append((str(_maps_cache), "plugins/Phasmo/Maps/cache"))
 binaries = []
 hiddenimports = ["sip", "cryptography"]
 hiddenimports += collect_submodules("app")
@@ -42,14 +49,14 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name="MainAuto",
+    name="Prime-Autoclicker",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
