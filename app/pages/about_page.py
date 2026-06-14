@@ -143,7 +143,7 @@ class AboutPage(QWidget):
             "💾  Auto-saved settings, presets, and profiles",
             "🔌  Plugin marketplace (Route Recorder, Input Humanization, …)",
             "🧩  Macro builder & preset hotkeys",
-            "👻  Phasmophobia offline reference (cheat sheet, timers)",
+            "👻  Unofficial Phasmophobia reference (offline guide, timers)",
             "🔒  HMAC-signed profile import/export",
         ]:
             lbl = QLabel(feat)
@@ -188,7 +188,8 @@ class AboutPage(QWidget):
             ccl.addLayout(r)
 
         disclaimer = QLabel(
-            "Use automation responsibly. Not affiliated with game publishers. "
+            "Use automation responsibly. Not affiliated with Mojang, Kinetic Games, or any game publisher. "
+            "The Phasmophobia plugin is an unofficial fan reference — not endorsed by Kinetic Games. "
             "May violate third-party Terms of Service — use at your own risk."
         )
         disclaimer.setObjectName("HeroSub")
@@ -218,7 +219,7 @@ class AboutPage(QWidget):
             ("Emergency stop  (default: Z)", "Instantly stop clicking while running"),
             ("Scroll key  (Settings)", "Toggle continuous mouse scrolling"),
             ("F8 / F9  (Route Recorder plugin)", "Record / replay input routes"),
-            ("Ctrl+K  (Phasmophobia plugin)", "Global search in the cheat sheet"),
+            ("Ctrl+K  (Unofficial Phasmo plugin)", "Global search in the reference guide"),
             ("↑ ↑ ↓ ↓ ← → ← → B A", "Konami Code easter egg on the home page"),
         ]:
             r = QHBoxLayout()

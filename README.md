@@ -1,6 +1,6 @@
 # Prime Autoclicker
 
-Desktop autoclicker with plugin system, macro builder, stats, and optional Phasmophobia cheat-sheet reference.
+Desktop autoclicker with plugin system, macro builder, stats, and an optional **unofficial** Phasmophobia reference plugin.
 
 Licensed under **GPL-3.0** (see [LICENSE](LICENSE)).
 
@@ -33,7 +33,7 @@ python Main/MainAuto.py
 
 ## Plugins (built-in)
 
-- **Phasmophobia** — offline ghost reference, timers, field guide (no save editor)
+- **Unofficial Phasmophobia reference** — offline ghost guide, timers, field guide (no save editor; not affiliated with Kinetic Games)
 - **Route Recorder** — record/replay input routes
 - **Input Humanization** — natural timing variation for clicks
 - **Preset Benchmark** — runtime stability telemetry
@@ -47,7 +47,7 @@ python Main/MainAuto.py
 ## Disclaimer
 
 This software automates mouse and keyboard input. Use responsibly and only where permitted.
-Not affiliated with Mojang, Kinetic Games, or any game publisher.
+Not affiliated with Mojang, Kinetic Games, or any game publisher. The Phasmophobia plugin is an **unofficial fan reference** — not endorsed by Kinetic Games.
 Automation may violate third-party Terms of Service — **use at your own risk**.
 
 The Phasmophobia **save editor** lives in a separate folder: `../PhasmoSaveEditor/` (not part of this release).

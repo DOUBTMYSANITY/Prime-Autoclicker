@@ -1,7 +1,7 @@
 def register(context: dict) -> dict:
     return {
         "id": "phasmopobia_plugin",
-        "name": "Phasmopobia",
+        "name": "Unofficial Phasmophobia Reference",
         "version": "1.0.0",
-        "description": "Offline Phasmophobia reference: ghost filters, field guide, timers, and map explorer.",
+        "description": "Unofficial offline fan guide: ghost filters, field guide, timers, and overlays. Not affiliated with Kinetic Games.",
     }

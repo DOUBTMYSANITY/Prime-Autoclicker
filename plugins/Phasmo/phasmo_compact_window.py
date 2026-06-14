@@ -41,7 +41,7 @@ class PhasmoCompactWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent, Qt.Window | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setWindowTitle("Phasmo Compact HUD")
+        self.setWindowTitle("Unofficial Phasmo HUD")
         self.setFixedWidth(340)
         self.setMinimumHeight(480)
         self._radius = 18
@@ -64,8 +64,11 @@ class PhasmoCompactWindow(QWidget):
         drag_lay.setContentsMargins(14, 10, 14, 8)
         mark = QLabel("👻")
         mark.setObjectName("CompactBrand")
-        title = QLabel("PHASMO HUD")
+        title = QLabel("UNOFFICIAL HUD")
         title.setObjectName("CompactTitle")
+        self.lbl_unofficial = QLabel("Fan reference · not affiliated with Kinetic Games")
+        self.lbl_unofficial.setObjectName("CompactSub")
+        self.lbl_unofficial.setWordWrap(True)
         self.lbl_count = QLabel("0 ghosts")
         self.lbl_count.setObjectName("CompactCount")
         self.lbl_count.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -79,6 +82,7 @@ class PhasmoCompactWindow(QWidget):
         content.setContentsMargins(14, 4, 14, 14)
         content.setSpacing(10)
 
+        content.addWidget(self.lbl_unofficial)
         sub = QLabel("Remaining suspects")
         sub.setObjectName("CompactSub")
         content.addWidget(sub)

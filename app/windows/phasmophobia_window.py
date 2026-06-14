@@ -307,7 +307,7 @@ class PhasmophobiaWindow(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_StyledBackground, True)
-        self.setWindowTitle("Phasmophobia Cheat Sheet")
+        self.setWindowTitle("Unofficial Phasmophobia Reference")
         self.resize(1900, 1080)
 
         self._drag_pos = None
@@ -365,12 +365,19 @@ class PhasmophobiaWindow(QMainWindow):
         brand_mark.setObjectName("PhasmoBrandMark")
         brand_mark.setAlignment(Qt.AlignCenter)
         brand_mark.setFixedSize(58, 58)
-        brand_text = QLabel("PHASMO\nCHEAT SHEET")
+        brand_text = QLabel("UNOFFICIAL\nPHASMO REF")
         brand_text.setObjectName("PhasmoBrandText")
         brand_row.addWidget(brand_mark)
         brand_row.addWidget(brand_text)
         brand_row.addStretch(1)
         sb.addLayout(brand_row)
+
+        unofficial_note = QLabel(
+            "Unofficial fan reference tool. Not affiliated with or endorsed by Kinetic Games."
+        )
+        unofficial_note.setObjectName("PhasmoSupport")
+        unofficial_note.setWordWrap(True)
+        sb.addWidget(unofficial_note)
 
         self.btn_ghost_type = PillButton("Ghost Type", "👻")
         self.btn_field_guide = PillButton("Field Guide", "📖")
@@ -406,9 +413,11 @@ class PhasmophobiaWindow(QMainWindow):
         top_bar.setContentsMargins(0, 0, 0, 0)
         top_bar.setSpacing(12)
         self.drag_bar.setStyleSheet("background: transparent;")
-        self.lbl_title = QLabel("Ghost Identification Cheat Sheet")
+        self.lbl_title = QLabel("Ghost Identification Reference")
         self.lbl_title.setObjectName("PhasmoTitle")
-        self.lbl_subtitle = QLabel("Filter by evidence, speed, and sanity — Ctrl+K to jump anywhere.")
+        self.lbl_subtitle = QLabel(
+            "Unofficial offline guide — filter by evidence, speed, and sanity. Ctrl+K to jump anywhere."
+        )
         self.lbl_subtitle.setObjectName("PhasmoSub")
         title_col = QVBoxLayout()
         title_col.addWidget(self.lbl_title)
@@ -1009,7 +1018,7 @@ class PhasmophobiaWindow(QMainWindow):
     def _switch_page(self, index: int):
         self.stack.setCurrentIndex(index)
         pages = (
-            ("Ghost Identification Cheat Sheet", "Filter by evidence, speed, and sanity — Ctrl+K to jump anywhere."),
+            ("Ghost Identification Reference", "Unofficial offline guide — filter by evidence, speed, and sanity. Ctrl+K to jump anywhere."),
             ("Field Guide", "Cursed possessions, equipment usage, and difficulty reference."),
             ("Difficulty Builder", "Match custom lobby modifiers — evidence slots sync with ghost filters."),
             ("Phasmo Settings", "Toggle overlays and customize timer HUDs. Enabled overlays stay on all tabs."),
@@ -1585,7 +1594,7 @@ class PhasmophobiaWindow(QMainWindow):
                 version = None
         if version and version != SUPPORTED_VERSION:
             self.lbl_version_banner.setText(
-                f"Save game version {version} differs from cheat sheet data ({SUPPORTED_VERSION}). "
+                f"Save game version {version} differs from reference data ({SUPPORTED_VERSION}). "
                 "Ghost stats or overlays may be outdated for your build."
             )
             self.lbl_version_banner.setStyleSheet("color: #e09030; font-weight: 700;")

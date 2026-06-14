@@ -1,6 +1,6 @@
-# Phasmopobia Cheat Sheet
+# Unofficial Phasmophobia Reference
 
-Offline reference pack for the Phasmophobia-style cheat sheet layout.
+Offline reference pack for an unofficial Phasmophobia-style guide layout. Not affiliated with Kinetic Games.
 
 This version keeps the useful parts of the original idea in a local, readable format: evidence lookup, ghost-specific tells, hunt thresholds, and quick equipment notes.
 

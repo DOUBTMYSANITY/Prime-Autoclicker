@@ -1835,7 +1835,7 @@ class MainWindow(QMainWindow):
             {"id": "route_recorder_plugin", "name": "Route Recorder", "version": "2.0.0", "description": "Record full keyboard/mouse routes with hotkeys and replay them with game-mode relative mouse movement.", "author": "Prime Team", "file_name": "route_recorder_plugin.py"},
             {"id": "input_humanization_plugin", "name": "Input Humanization", "version": "1.2.0", "description": "Adds natural timing variation, micro-pauses, and fatigue curves to click patterns.", "author": "Prime Team", "file_name": "input_humanization_plugin.py"},
             {"id": "preset_benchmark_plugin", "name": "Preset Benchmark", "version": "1.1.0", "description": "Performance telemetry for CPU load, missed inputs, lag score, and runtime stability.", "author": "Prime Team", "file_name": "preset_benchmark_plugin.py"},
-            {"id": "phasmopobia_plugin", "name": "Phasmophobia", "version": "1.2.0", "description": "Ghost filters, field guide, timer overlays, BPM finder, and Ctrl+K search.", "author": "Prime Team", "file_name": "phasmopobia_plugin.py"},
+            {"id": "phasmopobia_plugin", "name": "Unofficial Phasmophobia Reference", "version": "1.2.0", "description": "Unofficial offline fan guide: ghost filters, field guide, timer overlays, BPM finder, and Ctrl+K search. Not affiliated with Kinetic Games.", "author": "Prime Team", "file_name": "phasmopobia_plugin.py"},
             {"id": "example_plugin", "name": "Example Plugin", "version": "1.0.0", "description": "Example plugin for template/testing.", "author": "Prime Team", "file_name": "example_plugin.py"},
         ]
 
