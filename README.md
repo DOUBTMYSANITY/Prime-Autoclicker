@@ -50,8 +50,6 @@ This software automates mouse and keyboard input. Use responsibly and only where
 Not affiliated with Mojang, Kinetic Games, or any game publisher. The Phasmophobia plugin is an **unofficial fan reference** — not endorsed by Kinetic Games.
 Automation may violate third-party Terms of Service — **use at your own risk**.
 
-The Phasmophobia **save editor** lives in a separate folder: `../PhasmoSaveEditor/` (not part of this release).
-
 ## Third-party licenses
 
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
