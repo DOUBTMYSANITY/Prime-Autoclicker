@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "record_hotkey": "f8",
+  "execute_hotkey": "f9",
+  "record_name": "",
+  "selected_recording": "",
+  "record_keyboard": false,
+  "record_mouse_move": true,
+  "record_clicks": true,
+  "record_scroll": true,
+  "max_points": 5000,
+  "sampling_ms": 8,
+  "playback_speed": 1.0,
+  "jitter_px": 1,
+  "game_mode_relative_mouse": true,
+  "max_saved_routes": 40
+}

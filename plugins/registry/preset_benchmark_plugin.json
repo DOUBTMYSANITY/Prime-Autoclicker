@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "duration_seconds": 60,
+  "warmup_seconds": 5,
+  "score_weights": {
+    "stability": 0.5,
+    "consistency": 0.3,
+    "drift": 0.2
+  }
+}

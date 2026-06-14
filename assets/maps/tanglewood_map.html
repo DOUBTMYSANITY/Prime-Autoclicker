@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanglewood - Interactive Floor Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .map-canvas {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .room {
+            fill: rgba(30, 58, 138, 0.7);
+            stroke: rgba(100, 165, 255, 0.9);
+            stroke-width: 2.5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .room:hover {
+            fill: rgba(59, 130, 246, 0.9);
+            stroke: rgba(147, 197, 253, 1);
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+        }
+
+        .room.has-marker {
+            fill: rgba(139, 92, 246, 0.75);
+            stroke: rgba(196, 181, 253, 1);
+        }
+
+        .room.has-marker:hover {
+            fill: rgba(168, 85, 247, 1);
+        }
+
+        .room-label {
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 700;
+            fill: #e0e7ff;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+        }
+
+        .marker-text {
+            pointer-events: none;
+            font-size: 18px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+        }
+
+        .info-panel {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(100, 165, 255, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            width: 300px;
+            max-height: 350px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .info-panel.visible {
+            display: block;
+        }
+
+        .info-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .info-type {
+            font-size: 12px;
+            color: #93c5fd;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-marker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(100, 116, 139, 0.3);
+            border-radius: 6px;
+            border-left: 3px solid #fbbf24;
+        }
+
+        .info-marker.hide {
+            border-left-color: #34d399;
+        }
+
+        .title-label {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 999;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(100, 165, 255, 0.6);
+            border-radius: 10px;
+            padding: 12px 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .title-label h1 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+
+        .title-label p {
+            font-size: 11px;
+            color: #93c5fd;
+            margin: 4px 0 0 0;
+        }
+
+        .legend {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(100, 165, 255, 0.6);
+            border-radius: 10px;
+            padding: 12px 14px;
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            font-size: 11px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            border: 1px solid rgba(100, 165, 255, 0.8);
+        }
+
+        .legend-color.normal {
+            background: rgba(30, 58, 138, 0.7);
+        }
+
+        .legend-color.marker {
+            background: rgba(139, 92, 246, 0.75);
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 999;
+        }
+
+        .control-btn {
+            background: rgba(59, 130, 246, 0.9);
+            border: 1px solid rgba(147, 197, 253, 0.6);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn:hover {
+            background: rgba(59, 130, 246, 1);
+            border-color: rgba(147, 197, 253, 1);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="map-container">
+        <div class="map-canvas" id="mapCanvas"></div>
+    </div>
+
+    <div class="title-label">
+        <h1>🏠 6 Tanglewood Drive</h1>
+        <p>Ground Floor | Click a room</p>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <div class="info-title" id="infoTitle">Room</div>
+        <div class="info-type" id="infoType">Type</div>
+        <div id="infoMarkers"></div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color normal"></div>
+            <span>Regular</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color marker"></div>
+            <span>Special</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="resetView()">↺ Reset</button>
+        <button class="control-btn" onclick="toggleLabels()">🏷 Labels</button>
+    </div>
+
+    <script>
+        const tanglewood = {
+            rooms: [
+                { id: "living", name: "Living Room", type: "Room", x: 0.06, y: 0.18, w: 0.34, h: 0.36, markers: ["Cursed Possession"] },
+                { id: "dining", name: "Dining Room", type: "Room", x: 0.42, y: 0.18, w: 0.17, h: 0.18, markers: [] },
+                { id: "kitchen", name: "Kitchen", type: "Room", x: 0.62, y: 0.14, w: 0.28, h: 0.22, markers: [] },
+                { id: "foyer", name: "Foyer", type: "Hall", x: 0.40, y: 0.40, w: 0.16, h: 0.12, markers: [] },
+                { id: "boys", name: "Boys Bedroom", type: "Room", x: 0.08, y: 0.60, w: 0.18, h: 0.16, markers: ["Hide Spot"] },
+                { id: "bath1", name: "Main Bathroom", type: "Room", x: 0.28, y: 0.60, w: 0.12, h: 0.12, markers: [] },
+                { id: "nursery", name: "Nursery", type: "Room", x: 0.42, y: 0.58, w: 0.20, h: 0.16, markers: [] },
+                { id: "master", name: "Master Bedroom", type: "Room", x: 0.64, y: 0.48, w: 0.24, h: 0.22, markers: [] },
+                { id: "mbath", name: "Master BR(Bathroom)", type: "Room", x: 0.76, y: 0.72, w: 0.10, h: 0.08, markers: [] },
+                { id: "mcloset", name: "MasterBR(Closet)", type: "Room", x: 0.62, y: 0.72, w: 0.12, h: 0.08, markers: ["Hide Spot"] }
+            ]
+        };
+
+        let labelsVisible = true;
+        let selectedRoom = null;
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 1 1");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+
+        function initMap() {
+            const canvas = document.getElementById("mapCanvas");
+            if (!canvas) return;
+            
+            // Clear any existing content
+            canvas.innerHTML = "";
+            
+            // Set explicit dimensions
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+            
+            tanglewood.rooms.forEach(room => {
+                const hasMarker = room.markers.length > 0;
+                
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", room.x);
+                rect.setAttribute("y", room.y);
+                rect.setAttribute("width", room.w);
+                rect.setAttribute("height", room.h);
+                rect.setAttribute("class", `room ${hasMarker ? "has-marker" : ""}`);
+                rect.setAttribute("data-room-id", room.id);
+                rect.addEventListener("click", () => selectRoom(room));
+                svg.appendChild(rect);
+
+                const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute("x", room.x + room.w / 2);
+                label.setAttribute("y", room.y + room.h / 2);
+                label.setAttribute("class", "room-label");
+                label.textContent = room.name;
+                svg.appendChild(label);
+
+                if (hasMarker) {
+                    room.markers.forEach((marker, idx) => {
+                        const icon = marker.includes("Hide") ? "🔍" : "✨";
+                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        text.setAttribute("x", room.x + room.w / 2 + idx * 0.04);
+                        text.setAttribute("y", room.y + room.h / 2 - 0.04);
+                        text.setAttribute("class", "marker-text");
+                        text.textContent = icon;
+                        svg.appendChild(text);
+                    });
+                }
+            });
+
+            const wall = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            wall.setAttribute("x", "0.05");
+            wall.setAttribute("y", "0.12");
+            wall.setAttribute("width", "0.9");
+            wall.setAttribute("height", "0.76");
+            wall.setAttribute("fill", "none");
+            wall.setAttribute("stroke", "rgba(51, 65, 85, 0.8)");
+            wall.setAttribute("stroke-width", "0.015");
+            svg.appendChild(wall);
+
+            canvas.appendChild(svg);
+        }
+
+        function selectRoom(room) {
+            selectedRoom = room;
+            document.getElementById("infoTitle").textContent = room.name;
+            document.getElementById("infoType").textContent = room.type;
+            const markersHtml = room.markers.map(m => {
+                const isHide = m.includes("Hide");
+                return `<div class="info-marker ${isHide ? "hide" : ""}">
+                    <span>${isHide ? "🔍" : "✨"}</span>
+                    <span>${m}</span>
+                </div>`;
+            }).join("") || '<div style="color: #94a3b8; font-size: 11px;">No markers</div>';
+            document.getElementById("infoMarkers").innerHTML = markersHtml;
+            document.getElementById("infoPanel").classList.add("visible");
+        }
+
+        function resetView() {
+            selectedRoom = null;
+            document.getElementById("infoPanel").classList.remove("visible");
+        }
+
+        function toggleLabels() {
+            labelsVisible = !labelsVisible;
+            document.querySelectorAll(".room-label").forEach(l => {
+                l.style.display = labelsVisible ? "block" : "none";
+            });
+        }
+
+        // Initialize on DOMContentLoaded or immediately if already loaded
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initMap);
+        } else {
+            setTimeout(initMap, 0);
+        }
+        document.addEventListener("click", (e) => {
+            if (selectedRoom && !e.target.classList.contains("room")) {
+                resetView();
+            }
+        });
+    </script>
+</body>
+</html>

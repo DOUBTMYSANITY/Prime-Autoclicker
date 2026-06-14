@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "jitter_min_ms": 2,
+  "jitter_max_ms": 12,
+  "micro_pause_every": 35,
+  "micro_pause_ms": 45,
+  "fatigue_curve": "soft"
+}

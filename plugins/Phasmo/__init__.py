@@ -1,0 +1,1 @@
+"""Phasmophobia plugin support modules."""

@@ -1,0 +1,48 @@
+# Python cache/build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE/editor
+.vscode/
+.idea/
+.cursor/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime/private app data
+*.log
+debug-*.log
+
+# Local user config (never commit — lives in %USERPROFILE% by default)
+.mtau*
+**/.mtautoclicker*
+**/.mtautoclicker_*
+mtautoclicker_*.json
+**/backup_*.json
+**/*_bundle.json
+**/*bundle*.json
+**/bugreport_*.json
+
+# Route recordings (keyboard/mouse sessions — user data)
+**/route_recorder_routes.json
+
+# Phasmophobia save copies (never commit — real save is in AppData)
+plugins/Phasmo/data/SaveFile.txt
+plugins/Phasmo/data/SaveFile.txt.*
+**/SaveFile.txt
+**/SaveFile.txt.*
+
+# Build output (PyInstaller embeds absolute local paths — never commit)
+build/MainAuto/
+Main/build/
+dist/
+*.spec.bak

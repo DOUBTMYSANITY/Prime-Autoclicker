@@ -1,0 +1,46 @@
+{
+  "overlay_smudge": true,
+  "overlay_crucifix": true,
+  "overlay_obambo": true,
+  "overlay_bpm": true,
+  "smudge": {
+    "title": "Smudge Timer",
+    "color": "#22c55e",
+    "preset": "Minimal",
+    "radius": 24,
+    "opacity": 1.0,
+    "font_pt": 32,
+    "border": 5,
+    "width": 140
+  },
+  "crucifix": {
+    "title": "Crucifix Timer",
+    "color": "#ef4444",
+    "preset": "Bold",
+    "radius": 13,
+    "opacity": 0.5,
+    "font_pt": 23,
+    "border": 1,
+    "width": 168
+  },
+  "obambo": {
+    "title": "Obambo Timer",
+    "color": "#eab308",
+    "preset": "Bold",
+    "radius": 14,
+    "opacity": 0.95,
+    "font_pt": 24,
+    "border": 3,
+    "width": 180
+  },
+  "bpm_color": "#3b82f6",
+  "bpm_opacity": 0.5,
+  "bpm_radius": 4,
+  "compact_radius": 27,
+  "forced_evidence_count": 2,
+  "nightmare_mode": false,
+  "brightness_enabled": false,
+  "brightness_level": 100,
+  "gamma_enabled": false,
+  "gamma_level": 50
+}
