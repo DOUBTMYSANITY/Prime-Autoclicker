@@ -423,7 +423,7 @@ class AdminPanel(QWidget):
             row.addWidget(lbl); row.addWidget(val, 1)
             sys_lay.addLayout(row)
 
-        _info_row("App Version:", "2.4.0")
+        _info_row("App Version:", "1.0.0")
         _info_row("Python:", f"{sys.version.split()[0]}  ({platform.python_implementation()})")
         _info_row("OS:", f"{platform.system()} {platform.release()}")
         _info_row("AutoClicker Settings:", _AUTOCLICKER_SETTINGS_FILE)

@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
 
 from app.gui.widgets import Card, add_shadow
 
-_VERSION = "2.4.0"
+_VERSION = "1.0.0"
 _DISCORD_URL = "https://discord.gg/nkQT7XCX"
 
 
