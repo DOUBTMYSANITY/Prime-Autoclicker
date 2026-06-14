@@ -22,7 +22,7 @@ hiddenimports += collect_submodules("cryptography.hazmat.backends")
 hiddenimports += collect_submodules("cryptography.hazmat.bindings.openssl")
 hiddenimports += ["_cffi_backend"]
 
-for pkg in ("PyQt5", "PyQt5_sip", "pyautogui", "pynput", "PIL", "numpy", "pydirectinput"):
+for pkg in ("PyQt5", "PyQt5_sip", "pyautogui", "pynput", "PIL", "numpy", "psutil", "screen_brightness_control"):
     tmp = collect_all(pkg)
     datas += tmp[0]
     binaries += tmp[1]
