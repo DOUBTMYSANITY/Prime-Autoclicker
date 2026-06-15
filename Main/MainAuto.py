@@ -151,7 +151,22 @@ class StartupBootstrap(QObject):
         self._main_window.activateWindow()
 
 
+def _run_phasmo_only() -> None:
+    """Launch unofficial Phasmophobia reference without the autoclicker shell."""
+    app = QApplication(sys.argv)
+    from app.styling.themes import get_selected_theme_id
+    from app.windows.phasmophobia_window import PhasmophobiaWindow
+
+    win = PhasmophobiaWindow()
+    win.apply_theme(get_selected_theme_id())
+    win.show()
+    sys.exit(app.exec_())
+
+
 def main():
+    if "--phasmo-only" in sys.argv or "--phasmo" in sys.argv:
+        _run_phasmo_only()
+        return
     _install_interrupt_excepthook()
     try:
         app = QApplication(sys.argv)

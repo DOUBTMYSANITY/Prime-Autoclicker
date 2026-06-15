@@ -3,5 +3,5 @@ def register(context: dict) -> dict:
         "id": "input_humanization_plugin",
         "name": "Input Humanization",
         "version": "1.2.0",
-        "description": "Adds natural timing variation, micro-pauses, and fatigue curves to click patterns.",
+        "description": "Wired timing humanization: jitter, micro-pauses, and fatigue curves in the click engine.",
     }

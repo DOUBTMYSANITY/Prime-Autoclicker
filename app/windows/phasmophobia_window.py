@@ -50,6 +50,7 @@ from plugins.Phasmo.phasmo_timer_custom_ui import TimersCustomizePanel
 from plugins.Phasmo.phasmo_version import default_save_path, load_save, read_game_version_from_save
 from plugins.Phasmo.phasmo_difficulty_builder import DifficultyBuilderPage, DifficultyState
 from plugins.Phasmo.phasmo_field_guide import FieldGuidePage
+from plugins.Phasmo.phasmo_map_page import PhasmoMapPage
 
 
 @dataclass(frozen=True)
@@ -382,12 +383,14 @@ class PhasmophobiaWindow(QMainWindow):
         self.btn_ghost_type = PillButton("Ghost Type", "👻")
         self.btn_field_guide = PillButton("Field Guide", "📖")
         self.btn_difficulty = PillButton("Difficulty", "⚡")
+        self.btn_maps = PillButton("Maps", "🗺")
         self.btn_settings = PillButton("Settings", "⚙")
         self.btn_back = PillButton("Back", "↩")
 
         sb.addWidget(self.btn_ghost_type)
         sb.addWidget(self.btn_field_guide)
         sb.addWidget(self.btn_difficulty)
+        sb.addWidget(self.btn_maps)
         sb.addWidget(self.btn_settings)
         sb.addStretch(1)
         timer_hint = QLabel(
@@ -456,6 +459,10 @@ class PhasmophobiaWindow(QMainWindow):
         self._drag_surfaces.update({self.page_difficulty})
         self._install_drag_surface(self.page_difficulty)
         self.stack.addWidget(self.page_difficulty)
+        self.page_maps = PhasmoMapPage()
+        self._drag_surfaces.update({self.page_maps})
+        self._install_drag_surface(self.page_maps)
+        self.stack.addWidget(self.page_maps)
         self.page_settings = PhasmoSettingsPage(self._settings)
         self._drag_surfaces.update({self.page_settings})
         self._install_drag_surface(self.page_settings)
@@ -977,7 +984,8 @@ class PhasmophobiaWindow(QMainWindow):
         self.btn_ghost_type.clicked.connect(lambda: self._switch_page(0))
         self.btn_field_guide.clicked.connect(lambda: self._switch_page(1))
         self.btn_difficulty.clicked.connect(lambda: self._switch_page(2))
-        self.btn_settings.clicked.connect(lambda: self._switch_page(3))
+        self.btn_maps.clicked.connect(lambda: self._switch_page(3))
+        self.btn_settings.clicked.connect(lambda: self._switch_page(4))
         self.btn_filters_tab.clicked.connect(lambda: self._switch_filter_tab(0))
         self.btn_tools_tab.clicked.connect(lambda: self._switch_filter_tab(1))
         self.btn_timers_tab.clicked.connect(lambda: self._switch_filter_tab(2))
@@ -1021,6 +1029,7 @@ class PhasmophobiaWindow(QMainWindow):
             ("Ghost Identification Reference", "Unofficial offline guide — filter by evidence, speed, and sanity. Ctrl+K to jump anywhere."),
             ("Field Guide", "Cursed possessions, equipment usage, and difficulty reference."),
             ("Difficulty Builder", "Match custom lobby modifiers — evidence slots sync with ghost filters."),
+            ("Tanglewood Map", "Unofficial interactive floor map — opens in-app or in your browser."),
             ("Phasmo Settings", "Toggle overlays and customize timer HUDs. Enabled overlays stay on all tabs."),
         )
         if 0 <= index < len(pages):

@@ -116,6 +116,7 @@ class PresetPage(QWidget):
     """Presets page: list saved presets, create new ones, load them."""
 
     preset_loaded = pyqtSignal(dict)  # emitted when user loads a preset
+    app_preset_bind_requested = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -197,8 +198,15 @@ class PresetPage(QWidget):
         self.btn_delete.setCursor(Qt.PointingHandCursor)
         self.btn_delete.setFixedHeight(38)
 
+        self.btn_bind_app = QPushButton("📌  Bind to active app")
+        self.btn_bind_app.setObjectName("ToggleButton")
+        self.btn_bind_app.setProperty("active", False)
+        self.btn_bind_app.setCursor(Qt.PointingHandCursor)
+        self.btn_bind_app.setFixedHeight(38)
+
         btn_row.addWidget(self.btn_load)
         btn_row.addWidget(self.btn_delete)
+        btn_row.addWidget(self.btn_bind_app)
         btn_row.addStretch(1)
         lc_lay.addLayout(btn_row)
         lc_lay.addStretch(1)
@@ -273,7 +281,15 @@ class PresetPage(QWidget):
         self.btn_new.clicked.connect(self._on_new)
         self.btn_load.clicked.connect(self._on_load)
         self.btn_delete.clicked.connect(self._on_delete)
+        self.btn_bind_app.clicked.connect(self._on_bind_app)
         self._refresh_list()
+
+    def _on_bind_app(self):
+        idx = self.preset_list.currentRow()
+        if 0 <= idx < len(self._presets):
+            name = str(self._presets[idx].get("name", "")).strip()
+            if name:
+                self.app_preset_bind_requested.emit(name)
 
     def _refresh_list(self):
         self.preset_list.clear()

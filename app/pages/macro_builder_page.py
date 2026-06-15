@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QComboBox,
     QSpinBox,
+    QFileDialog,
 )
 from pynput.keyboard import Controller as KeyboardController
 from pynput.mouse import Button, Controller as MouseController
@@ -137,6 +138,16 @@ class MacroBuilderPage(QWidget):
 
         row_run = QHBoxLayout()
         row_run.setSpacing(10)
+        self.spin_loops = QSpinBox()
+        self.spin_loops.setObjectName("TimeSpin")
+        self.spin_loops.setRange(1, 10_000)
+        self.spin_loops.setValue(1)
+        self.spin_loops.setPrefix("Loops: ")
+        self.btn_export = QPushButton("Export JSON")
+        self.btn_import = QPushButton("Import JSON")
+        for btn in (self.btn_export, self.btn_import):
+            btn.setObjectName("ToggleButton")
+            btn.setProperty("active", False)
         self.btn_run = QPushButton("Run Flow")
         self.btn_stop = QPushButton("Stop")
         self.btn_run.setObjectName("StartStopBtn")
@@ -144,8 +155,11 @@ class MacroBuilderPage(QWidget):
         self.btn_stop.setProperty("active", False)
         self.lbl_status = QLabel("Status: idle")
         self.lbl_status.setObjectName("StatusLabel")
+        row_run.addWidget(self.spin_loops)
         row_run.addWidget(self.btn_run)
         row_run.addWidget(self.btn_stop)
+        row_run.addWidget(self.btn_export)
+        row_run.addWidget(self.btn_import)
         row_run.addWidget(self.lbl_status)
         row_run.addStretch(1)
         bl.addLayout(row_run)
@@ -162,6 +176,8 @@ class MacroBuilderPage(QWidget):
         self.btn_load_flow.clicked.connect(self._on_load_flow)
         self.btn_run.clicked.connect(self._on_run)
         self.btn_stop.clicked.connect(self._on_stop)
+        self.btn_export.clicked.connect(self._on_export_flow)
+        self.btn_import.clicked.connect(self._on_import_flow)
         self.status_changed.connect(self._set_status)
 
     def _on_add_step(self):
@@ -226,7 +242,8 @@ class MacroBuilderPage(QWidget):
             return
         self._stop_event.clear()
         steps = [dict(s) for s in self._steps]
-        self._run_thread = threading.Thread(target=self._run_steps, args=(steps,), daemon=True)
+        loops = max(1, int(self.spin_loops.value()))
+        self._run_thread = threading.Thread(target=self._run_steps, args=(steps, loops), daemon=True)
         self._run_thread.start()
         self.status_changed.emit("Status: running")
 
@@ -234,33 +251,64 @@ class MacroBuilderPage(QWidget):
         self._stop_event.set()
         self.status_changed.emit("Status: stopping...")
 
-    def _run_steps(self, steps: list[dict]):
+    def _run_steps(self, steps: list[dict], loops: int = 1):
         try:
-            for idx, step in enumerate(steps, start=1):
+            for loop_idx in range(max(1, loops)):
                 if self._stop_event.is_set():
                     self.status_changed.emit("Status: stopped")
                     return
-                action = step.get("action", "")
-                value = int(step.get("value", 0))
-                text = str(step.get("text", "")).strip()
+                for idx, step in enumerate(steps, start=1):
+                    if self._stop_event.is_set():
+                        self.status_changed.emit("Status: stopped")
+                        return
+                    action = step.get("action", "")
+                    value = int(step.get("value", 0))
+                    text = str(step.get("text", "")).strip()
 
-                if action == "wait_ms":
-                    self._stop_event.wait(max(0, value) / 1000.0)
-                elif action == "click_left":
-                    self._mouse.click(Button.left, max(1, value if value > 0 else 1))
-                elif action == "click_right":
-                    self._mouse.click(Button.right, max(1, value if value > 0 else 1))
-                elif action == "scroll":
-                    self._mouse.scroll(0, value)
-                elif action == "key_tap":
-                    key_text = text or "a"
-                    self._keyboard.press(key_text)
-                    self._keyboard.release(key_text)
+                    if action == "wait_ms":
+                        self._stop_event.wait(max(0, value) / 1000.0)
+                    elif action == "click_left":
+                        self._mouse.click(Button.left, max(1, value if value > 0 else 1))
+                    elif action == "click_right":
+                        self._mouse.click(Button.right, max(1, value if value > 0 else 1))
+                    elif action == "scroll":
+                        self._mouse.scroll(0, value)
+                    elif action == "key_tap":
+                        key_text = text or "a"
+                        self._keyboard.press(key_text)
+                        self._keyboard.release(key_text)
 
-                self.status_changed.emit(f"Status: step {idx}/{len(steps)} done")
+                    self.status_changed.emit(f"Status: loop {loop_idx + 1}/{loops} step {idx}/{len(steps)}")
             self.status_changed.emit("Status: finished")
         except Exception as exc:
             self.status_changed.emit(f"Status: error: {exc}")
+
+    def _on_export_flow(self):
+        name = self.input_flow_name.text().strip() or self.cmb_saved_flows.currentText().strip() or "macro_flow"
+        path, _ = QFileDialog.getSaveFileName(self, "Export macro flow", f"{name}.json", "JSON (*.json)")
+        if not path:
+            return
+        payload = {"name": name, "steps": self._steps, "loops": int(self.spin_loops.value())}
+        Path(path).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        self.status_changed.emit(f"Status: exported to {path}")
+
+    def _on_import_flow(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Import macro flow", "", "JSON (*.json)")
+        if not path:
+            return
+        try:
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+            steps = data.get("steps", [])
+            if not isinstance(steps, list):
+                raise ValueError("invalid steps")
+            self._steps = [dict(s) for s in steps]
+            self.spin_loops.setValue(max(1, int(data.get("loops", 1))))
+            name = str(data.get("name", Path(path).stem))
+            self.input_flow_name.setText(name)
+            self._refresh_step_list()
+            self.status_changed.emit(f"Status: imported {name}")
+        except Exception as exc:
+            self.status_changed.emit(f"Status: import failed: {exc}")
 
     def _set_status(self, text: str):
         self.lbl_status.setText(text)

@@ -346,7 +346,7 @@ class _SecretLineEdit(QLineEdit):
             super().keyPressEvent(event)
             return
         txt = event.text()
-        if txt:
+        if txt and self._spin._SECRET:
             buf = self._spin._key_buf
             buf.append(txt)
             secret = self._spin._SECRET
@@ -363,11 +363,15 @@ class FocusClearSpinBox(QSpinBox):
     """QSpinBox that clears focus when Enter/Return is pressed."""
     from PyQt5.QtCore import pyqtSignal as _sig
     secret_code_entered = _sig()
-    _SECRET = "08102020"
+
+    @staticmethod
+    def admin_easter_egg_code() -> str:
+        return (os.getenv("MTA_ADMIN_EASTER_EGG") or "").strip()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._key_buf: list[str] = []
+        self._SECRET = self.admin_easter_egg_code()
         self.setLineEdit(_SecretLineEdit(self))
 
 
@@ -625,6 +629,9 @@ class CompactOverlay(QWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(220, 72)
         self._drag_pos = None
+        self._click_count = 0
+        self._elapsed_label = "00:00"
+        self._hotkey_label = "-"
 
         bg = QFrame(self)
         bg.setGeometry(0, 0, 220, 72)
@@ -663,6 +670,15 @@ class CompactOverlay(QWidget):
         )
         lay.addWidget(self.btn_toggle)
 
+    def set_click_count(self, count: int):
+        self._click_count = max(0, int(count))
+        self._refresh_meta()
+
+    def _refresh_meta(self):
+        hk = self.lbl_meta.text().split("|")[-1].strip() if "|" in self.lbl_meta.text() else "HK:-"
+        elapsed = self.lbl_meta.text().split("|")[0].strip() if "|" in self.lbl_meta.text() else "00:00"
+        self.lbl_meta.setText(f"{elapsed} | {self._click_count} clicks | {hk}")
+
     def set_running(self, running: bool):
         self.btn_toggle.setText("\u25a0" if running else "\u25b6")
         self.lbl_status.setText("Running" if running else "Stopped")
@@ -671,14 +687,20 @@ class CompactOverlay(QWidget):
         self.lbl_cps.setText(f"{cps:.0f} CPS")
 
     def set_hotkey(self, hotkey: str):
-        base = self.lbl_meta.text().split("|")[0].strip()
-        self.lbl_meta.setText(f"{base} | HK:{hotkey.upper() if hotkey else '-'}")
+        self._hotkey_label = hotkey.upper() if hotkey else "-"
+        self._refresh_meta()
 
     def set_elapsed(self, seconds: int):
         mm = max(0, seconds) // 60
         ss = max(0, seconds) % 60
-        hk = self.lbl_meta.text().split("|")[-1].strip() if "|" in self.lbl_meta.text() else "HK:-"
-        self.lbl_meta.setText(f"{mm:02d}:{ss:02d} | {hk}")
+        self._elapsed_label = f"{mm:02d}:{ss:02d}"
+        self._refresh_meta()
+
+    def _refresh_meta(self):
+        elapsed = getattr(self, "_elapsed_label", "00:00")
+        hk = getattr(self, "_hotkey_label", "-")
+        clicks = getattr(self, "_click_count", 0)
+        self.lbl_meta.setText(f"{elapsed} | {clicks} clicks | HK:{hk}")
 
     # Drag support
     def mousePressEvent(self, event):

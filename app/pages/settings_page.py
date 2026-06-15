@@ -128,6 +128,14 @@ class SettingsPage(QWidget):
             "toggle_both_mouse_key": "",
             "performance_mode": False,
             "language": "en",
+            "tray_minimize": True,
+            "color_trigger_enabled": False,
+            "color_trigger_x": 0,
+            "color_trigger_y": 0,
+            "color_trigger_r": 255,
+            "color_trigger_g": 0,
+            "color_trigger_b": 0,
+            "color_trigger_tolerance": 12,
             "topbar_action": "search",
             "sidebar_basic_mode": False,
             "sidebar_order": "home,preset,settings,stats,achievements,projects,help",
@@ -604,6 +612,11 @@ class SettingsPage(QWidget):
         )
         ij_lay.addWidget(self.chk_overlay)
 
+        self.chk_tray_minimize = QCheckBox("Minimize to system tray (hide window when minimized)")
+        self.chk_tray_minimize.setChecked(self._settings.get("tray_minimize", True))
+        self.chk_tray_minimize.stateChanged.connect(self._on_tray_minimize_changed)
+        ij_lay.addWidget(self.chk_tray_minimize)
+
         self.lbl_overlay_desc = QLabel("A tiny draggable window that stays on top showing CPS and start/stop.")
         self.lbl_overlay_desc.setObjectName("WarnText")
         self.lbl_overlay_desc.setWordWrap(True)
@@ -723,6 +736,57 @@ class SettingsPage(QWidget):
         self.lbl_corner_stop_desc.setObjectName("WarnText")
         self.lbl_corner_stop_desc.setWordWrap(True)
         ij_lay.addWidget(self.lbl_corner_stop_desc)
+
+        self.sep_color_trigger = QFrame()
+        self.sep_color_trigger.setObjectName("SettingsSeparator")
+        self.sep_color_trigger.setFixedHeight(1)
+        ij_lay.addWidget(self.sep_color_trigger)
+
+        self.lbl_color_trigger_title = QLabel("Color / Pixel Trigger")
+        self.lbl_color_trigger_title.setObjectName("InnerTitle")
+        ij_lay.addWidget(self.lbl_color_trigger_title)
+
+        self.chk_color_trigger = QCheckBox("Auto-stop when pixel at X,Y matches RGB (± tolerance)")
+        self.chk_color_trigger.setChecked(self._settings.get("color_trigger_enabled", False))
+        self.chk_color_trigger.stateChanged.connect(self._on_color_trigger_changed)
+        ij_lay.addWidget(self.chk_color_trigger)
+
+        color_grid = QGridLayout()
+        color_grid.setHorizontalSpacing(8)
+        color_grid.setVerticalSpacing(6)
+        self.spin_color_x = FocusClearSpinBox()
+        self.spin_color_y = FocusClearSpinBox()
+        self.spin_color_r = FocusClearSpinBox()
+        self.spin_color_g = FocusClearSpinBox()
+        self.spin_color_b = FocusClearSpinBox()
+        self.spin_color_tol = FocusClearSpinBox()
+        for spin, val, hi in (
+            (self.spin_color_x, self._settings.get("color_trigger_x", 0), 9999),
+            (self.spin_color_y, self._settings.get("color_trigger_y", 0), 9999),
+            (self.spin_color_r, self._settings.get("color_trigger_r", 255), 255),
+            (self.spin_color_g, self._settings.get("color_trigger_g", 0), 255),
+            (self.spin_color_b, self._settings.get("color_trigger_b", 0), 255),
+            (self.spin_color_tol, self._settings.get("color_trigger_tolerance", 12), 64),
+        ):
+            spin.setObjectName("TimeSpin")
+            spin.setRange(0, hi)
+            spin.setValue(int(val))
+            spin.setFixedHeight(34)
+            spin.valueChanged.connect(self._on_color_trigger_changed)
+        labels = ("X", "Y", "R", "G", "B", "Tol")
+        spins = (
+            self.spin_color_x, self.spin_color_y, self.spin_color_r,
+            self.spin_color_g, self.spin_color_b, self.spin_color_tol,
+        )
+        for col, (lbl, spin) in enumerate(zip(labels, spins)):
+            color_grid.addWidget(QLabel(lbl), 0, col)
+            color_grid.addWidget(spin, 1, col)
+        ij_lay.addLayout(color_grid)
+
+        self.lbl_color_trigger_desc = QLabel("Useful for stopping when a UI element changes color. Checked each click cycle.")
+        self.lbl_color_trigger_desc.setObjectName("WarnText")
+        self.lbl_color_trigger_desc.setWordWrap(True)
+        ij_lay.addWidget(self.lbl_color_trigger_desc)
 
         # Separator
         self.sep_hotkey_3 = QFrame()
@@ -1770,6 +1834,34 @@ class SettingsPage(QWidget):
         # Delay unit combo
         self.delay_unit.setItemText(0, tr("milliseconds"))
         self.delay_unit.setItemText(1, tr("seconds"))
+
+    def _on_color_trigger_changed(self, *_args) -> None:
+        self._settings["color_trigger_enabled"] = self.chk_color_trigger.isChecked()
+        self._settings["color_trigger_x"] = int(self.spin_color_x.value())
+        self._settings["color_trigger_y"] = int(self.spin_color_y.value())
+        self._settings["color_trigger_r"] = int(self.spin_color_r.value())
+        self._settings["color_trigger_g"] = int(self.spin_color_g.value())
+        self._settings["color_trigger_b"] = int(self.spin_color_b.value())
+        self._settings["color_trigger_tolerance"] = int(self.spin_color_tol.value())
+        _save_settings(self._settings)
+
+    def _on_tray_minimize_changed(self, *_args) -> None:
+        self._settings["tray_minimize"] = self.chk_tray_minimize.isChecked()
+        _save_settings(self._settings)
+
+    def get_color_trigger_settings(self) -> dict:
+        return {
+            "enabled": bool(self._settings.get("color_trigger_enabled", False)),
+            "x": int(self._settings.get("color_trigger_x", 0)),
+            "y": int(self._settings.get("color_trigger_y", 0)),
+            "r": int(self._settings.get("color_trigger_r", 255)),
+            "g": int(self._settings.get("color_trigger_g", 0)),
+            "b": int(self._settings.get("color_trigger_b", 0)),
+            "tolerance": int(self._settings.get("color_trigger_tolerance", 12)),
+        }
+
+    def get_tray_minimize_enabled(self) -> bool:
+        return bool(self._settings.get("tray_minimize", True))
 
 
 def play_sound(key: str, custom_path: str = ""):

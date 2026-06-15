@@ -66,6 +66,21 @@ class ClickConfig:
     corner_stop_enabled: bool = True
     corner_stop_size_px: int = 20
 
+    # Input humanization plugin
+    humanization_enabled: bool = False
+    humanization_jitter_min_ms: int = 2
+    humanization_jitter_max_ms: int = 12
+    humanization_micro_pause_every: int = 35
+    humanization_micro_pause_ms: int = 45
+    humanization_fatigue_curve: str = "soft"
+
+    # Color / pixel trigger — stop when screen pixel matches (optional)
+    color_trigger_enabled: bool = False
+    color_trigger_x: int = 0
+    color_trigger_y: int = 0
+    color_trigger_rgb: tuple[int, int, int] = (255, 0, 0)
+    color_trigger_tolerance: int = 12
+
 
 class AutoRunner(QObject):
     started = pyqtSignal()
@@ -161,7 +176,7 @@ class AutoRunner(QObject):
     def _button_obj(self, cfg: ClickConfig) -> Button:
         return self._btn_from_str(cfg.button)
 
-    def _compute_delay_seconds(self, cfg: ClickConfig) -> float:
+    def _compute_delay_seconds(self, cfg: ClickConfig, click_index: int = 0) -> float:
         if cfg.use_cps:
             cps = max(0.1, float(cfg.cps))
             base = 1.0 / cps
@@ -172,7 +187,38 @@ class AutoRunner(QObject):
         if jitter > 0:
             base += random.randint(0, jitter) / 1000.0
 
+        if cfg.humanization_enabled and click_index > 0:
+            from app.services.input_humanization import HumanizationSettings, extra_delay_seconds
+
+            hs = HumanizationSettings(
+                enabled=True,
+                jitter_min_ms=cfg.humanization_jitter_min_ms,
+                jitter_max_ms=cfg.humanization_jitter_max_ms,
+                micro_pause_every=cfg.humanization_micro_pause_every,
+                micro_pause_ms=cfg.humanization_micro_pause_ms,
+                fatigue_curve=cfg.humanization_fatigue_curve,
+            )
+            base += extra_delay_seconds(hs, click_index)
+
         return max(0.0, base)
+
+    @staticmethod
+    def _pixel_matches(cfg: ClickConfig) -> bool:
+        if not cfg.color_trigger_enabled:
+            return False
+        try:
+            import pyautogui
+
+            r, g, b = pyautogui.pixel(cfg.color_trigger_x, cfg.color_trigger_y)
+            tr, tg, tb = cfg.color_trigger_rgb
+            tol = max(0, int(cfg.color_trigger_tolerance))
+            return (
+                abs(int(r) - int(tr)) <= tol
+                and abs(int(g) - int(tg)) <= tol
+                and abs(int(b) - int(tb)) <= tol
+            )
+        except Exception:
+            return False
 
     def _precision_sleep(self, seconds: float) -> None:
         """High-precision sleep that works down to sub-millisecond intervals.
@@ -311,8 +357,13 @@ class AutoRunner(QObject):
                 if time_limit > 0 and (time.time() - start_time) * 1000 >= time_limit:
                     break
 
+                # Color trigger — stop when target pixel matches
+                if self._pixel_matches(cfg):
+                    self.status.emit("Auto-stopped: color trigger matched")
+                    break
+
                 if cfg.press_and_hold:
-                    if self._stop_event.wait(self._compute_delay_seconds(cfg)):
+                    if self._stop_event.wait(self._compute_delay_seconds(cfg, performed + 1)):
                         break
                     continue
 
@@ -326,7 +377,7 @@ class AutoRunner(QObject):
                     self.click_at_position.emit(pos[0], pos[1])
                     if target > 0 and performed >= target:
                         break
-                    self._stop_event.wait(self._compute_delay_seconds(cfg))
+                    self._stop_event.wait(self._compute_delay_seconds(cfg, performed + 1))
                     continue
 
                 # Move to fixed position if configured
@@ -381,7 +432,7 @@ class AutoRunner(QObject):
                     break
 
                 # ── Compute sleep with optional CPS stabilization ──
-                base_delay = self._compute_delay_seconds(cfg)
+                base_delay = self._compute_delay_seconds(cfg, performed)
                 now_perf = time.perf_counter()
                 _click_times.append(now_perf)
                 _stab_tick += 1

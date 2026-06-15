@@ -43,6 +43,7 @@ plugins/Phasmo/data/SaveFile.txt.*
 
 # Build output (PyInstaller embeds absolute local paths — never commit)
 build/MainAuto/
+build/build/
 Main/build/
 dist/
 *.spec.bak

@@ -5,9 +5,9 @@ from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout,
     QFrame, QScrollArea, QDialog, QSizeGrip, QSpinBox, QLineEdit, QTextEdit,
     QFormLayout, QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout,
-    QApplication, QCompleter,
+    QApplication, QCompleter, QSystemTrayIcon, QMenu, QAction,
 )
-from PyQt5.QtGui import QMouseEvent, QRegion
+from PyQt5.QtGui import QMouseEvent, QRegion, QIcon
 from pynput import keyboard
 from pynput import mouse as _mouse
 from pynput.mouse import Controller as MouseController
@@ -41,6 +41,10 @@ from app.pages.marketplace_page import MarketplacePage
 from app.services.plugin_system import PluginManager
 from app.pages.support_hub_page import SupportHubPage
 from app.services.app_services import AppServices
+from app.services.preset_benchmark import benchmark_session
+from app.services.update_checker import UpdateChecker
+
+APP_VERSION = "1.1.0"
 import ctypes as _ctypes
 import sys as _sys
 import json as _json
@@ -724,6 +728,7 @@ class MainWindow(QMainWindow):
         self.page_preset.btn_new.clicked.disconnect()  # disconnect the stub
         self.page_preset.btn_new.clicked.connect(self._on_new_preset)
         self.page_preset.preset_loaded.connect(self._on_load_preset)
+        self.page_preset.app_preset_bind_requested.connect(self._on_bind_preset_to_app)
 
         # Language change
         self.page_settings.language_changed.connect(self._on_language_changed)
@@ -790,6 +795,7 @@ class MainWindow(QMainWindow):
 
         # Initial XP bar sync
         self._refresh_xp_bar()
+        self._init_release_features()
 
     # ── Achievement toast helpers ──────────────────────
     def _snapshot_achievements(self):
@@ -1103,7 +1109,10 @@ class MainWindow(QMainWindow):
         row3 = QHBoxLayout()
         row3.setSpacing(8)
         chk_keyboard = QCheckBox("Record Keyboard")
-        chk_keyboard.setChecked(bool(data.get("record_keyboard", True)))
+        chk_keyboard.setChecked(bool(data.get("record_keyboard", False)))
+        warn_kb = QLabel("Warning: keyboard recording may capture passwords. Keep off unless needed.")
+        warn_kb.setObjectName("WarnText")
+        warn_kb.setWordWrap(True)
         chk_move = QCheckBox("Record Mouse Move")
         chk_move.setChecked(bool(data.get("record_mouse_move", True)))
         chk_clicks = QCheckBox("Record Clicks")
@@ -1116,6 +1125,7 @@ class MainWindow(QMainWindow):
         row3.addWidget(chk_scroll)
         row3.addStretch(1)
         pl.addLayout(row3)
+        pl.addWidget(warn_kb)
 
         row4 = QHBoxLayout()
         row4.setSpacing(8)
@@ -2334,9 +2344,6 @@ class MainWindow(QMainWindow):
             if token in preset_hks and self.isVisible():
                 self._hotkey_signal.emit(f"preset:{token}")
 
-    def changeEvent(self, event):
-        super().changeEvent(event)
-
     def _toggle_mouse_button_mode(self):
         button = self.page_home.toggle_left_right_button()
         self._show_status_toast(f"Mouse button: {button.title()}")
@@ -2694,6 +2701,9 @@ class MainWindow(QMainWindow):
                 self.config.corner_stop_enabled = bool(corner_enabled)
                 self.config.corner_stop_size_px = max(1, int(corner_size))
 
+                self._apply_humanization_and_color_trigger()
+                self._start_benchmark_if_enabled()
+
                 self.runner.set_config(self.config)
                 self.runner.start()
                 self._log_event("Manual start via UI/hotkey")
@@ -2701,6 +2711,8 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(200, lambda: setattr(self, "_is_toggling", False))
 
     def closeEvent(self, event):
+        if hasattr(self, "_tray") and self._tray is not None:
+            self._tray.hide()
         if hasattr(self, '_scroll_timer') and self._scroll_timer.isActive():
             self._scroll_timer.stop()
         if self._rr_recording:
@@ -2777,6 +2789,12 @@ class MainWindow(QMainWindow):
             self._sync_maximize_icon()
             self._update_window_mask()
             self._update_size_grip()
+            if (
+                self.isMinimized()
+                and getattr(self, "_tray", None) is not None
+                and self.page_settings.get_tray_minimize_enabled()
+            ):
+                QTimer.singleShot(0, self.hide)
         super().changeEvent(event)
 
     def resizeEvent(self, event):
@@ -2790,6 +2808,15 @@ class MainWindow(QMainWindow):
         self._update_window_mask()
         self._sync_maximize_icon()
         self._update_size_grip()
+        if not getattr(self, "_first_show_done", False):
+            self._first_show_done = True
+            from app.services.first_run import show_first_run_disclaimer
+
+            if not show_first_run_disclaimer(self):
+                QTimer.singleShot(0, self.close)
+                return
+            if hasattr(self, "_update_checker"):
+                QTimer.singleShot(4000, self._update_checker.check_async)
 
     def _update_window_mask(self):
         if self.isMaximized():
@@ -2858,6 +2885,8 @@ class MainWindow(QMainWindow):
         self._last_gui_tick = now
 
         old_total, new_total = self._flush_pending_click_stats()
+        if benchmark_session.enabled:
+            benchmark_session.record_click()
 
         if hasattr(self, 'page_stats'):
             self.page_stats.record_click_time()
@@ -2865,6 +2894,8 @@ class MainWindow(QMainWindow):
         self.page_home.cps_spark.record_click()
         # Update overlay CPS
         self._overlay.set_cps(self.page_home.cps_spark.current_cps)
+        self._session_click_overlay = getattr(self, "_session_click_overlay", 0) + max(1, int(count))
+        self._overlay.set_click_count(self._session_click_overlay)
         # XP bar
         self._refresh_xp_bar()
         if self.page_settings.get_per_click_sound():
@@ -2897,6 +2928,8 @@ class MainWindow(QMainWindow):
         if self.runner.is_running() and accuracy >= self._smart_stabilize_best_accuracy:
             self._smart_stabilize_best_accuracy = float(accuracy)
             self._smart_stabilize_best_correction_ms = float(correction_ms)
+        if benchmark_session.enabled:
+            benchmark_session.record_cps_sample(accuracy, actual_cps)
         if not self._lag_guard_enabled or not self.runner.is_running():
             return
         if accuracy < float(self._lag_guard_threshold):
@@ -3038,6 +3071,7 @@ class MainWindow(QMainWindow):
 
     def _on_session_start(self):
         self._session_start = _time_module.time()
+        self._session_click_overlay = 0
         self.page_home.cps_spark.start()
         self._overlay.set_running(True)
         self._overlay_time.start()
@@ -3046,6 +3080,13 @@ class MainWindow(QMainWindow):
     def _on_session_stop(self):
         self._flush_pending_click_stats()
         self._save_smart_stabilize_profile()
+        report = benchmark_session.stop()
+        if report.get("samples"):
+            self._show_status_toast(
+                f"Benchmark: smoothness {report.get('smoothness_score', 0):.0f} | "
+                f"accuracy {report.get('avg_accuracy', 0):.0f}%",
+                icon="\U0001F4CA",
+            )
         if self._session_start is not None:
             duration = _time_module.time() - self._session_start
             self.stats.record_session(duration)
@@ -3328,3 +3369,130 @@ class MainWindow(QMainWindow):
                      self.page_stats, self.page_achievements, self.page_builder, self.page_support, self.page_marketplace):
             if hasattr(page, 'retranslateUi'):
                 page.retranslateUi()
+
+    def _init_release_features(self) -> None:
+        self._first_show_done = False
+        self._session_click_overlay = 0
+        self._last_app_preset_exe = ""
+        self._setup_system_tray()
+        self._update_checker = UpdateChecker(APP_VERSION, self)
+        self._update_checker.update_available.connect(self._on_update_available)
+        self._app_preset_timer = QTimer(self)
+        self._app_preset_timer.setInterval(2500)
+        self._app_preset_timer.timeout.connect(self._check_app_preset_profile)
+        self._app_preset_timer.start()
+
+    def _setup_system_tray(self) -> None:
+        if not QSystemTrayIcon.isSystemTrayAvailable():
+            self._tray = None
+            return
+        self._tray = QSystemTrayIcon(self)
+        self._tray.setToolTip("Prime Autoclicker")
+        try:
+            self._tray.setIcon(self.style().standardIcon(self.style().SP_ComputerIcon))
+        except Exception:
+            pass
+        menu = QMenu(self)
+        act_show = QAction("Show Prime Autoclicker", self)
+        act_toggle = QAction("Toggle clicking", self)
+        act_quit = QAction("Quit", self)
+        act_show.triggered.connect(self._tray_show_window)
+        act_toggle.triggered.connect(self._toggle_autoclicker)
+        act_quit.triggered.connect(QApplication.quit)
+        menu.addAction(act_show)
+        menu.addAction(act_toggle)
+        menu.addSeparator()
+        menu.addAction(act_quit)
+        self._tray.setContextMenu(menu)
+        self._tray.activated.connect(self._on_tray_activated)
+        self._tray.show()
+
+    def _tray_show_window(self) -> None:
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+
+    def _on_tray_activated(self, reason) -> None:
+        if reason == QSystemTrayIcon.DoubleClick:
+            self._tray_show_window()
+
+    def _on_update_available(self, tag: str, name: str) -> None:
+        self._show_status_toast(f"Update available: {name} ({tag}) — see Support → Update Checker", icon="\u2B06")
+
+    def _apply_humanization_and_color_trigger(self) -> None:
+        hum = self._load_plugin_options("input_humanization_plugin")
+        self.config.humanization_enabled = bool(hum.get("enabled", False))
+        self.config.humanization_jitter_min_ms = int(hum.get("jitter_min_ms", 2))
+        self.config.humanization_jitter_max_ms = int(hum.get("jitter_max_ms", 12))
+        self.config.humanization_micro_pause_every = int(hum.get("micro_pause_every", 35))
+        self.config.humanization_micro_pause_ms = int(hum.get("micro_pause_ms", 45))
+        self.config.humanization_fatigue_curve = str(hum.get("fatigue_curve", "soft"))
+
+        ct = self.page_settings.get_color_trigger_settings()
+        self.config.color_trigger_enabled = bool(ct.get("enabled"))
+        self.config.color_trigger_x = int(ct.get("x", 0))
+        self.config.color_trigger_y = int(ct.get("y", 0))
+        self.config.color_trigger_rgb = (
+            int(ct.get("r", 255)),
+            int(ct.get("g", 0)),
+            int(ct.get("b", 0)),
+        )
+        self.config.color_trigger_tolerance = int(ct.get("tolerance", 12))
+
+    def _load_plugin_options(self, plugin_id: str) -> dict:
+        try:
+            cfg_path = self._ensure_plugin_config(plugin_id)
+            with open(cfg_path, "r", encoding="utf-8") as fp:
+                return _json.load(fp)
+        except Exception:
+            return self._default_plugin_options(plugin_id)
+
+    def _start_benchmark_if_enabled(self) -> None:
+        bench = self._load_plugin_options("preset_benchmark_plugin")
+        if not bool(bench.get("enabled", False)):
+            return
+        preset_name = ""
+        try:
+            idx = self.page_preset.preset_list.currentRow()
+            if idx >= 0:
+                preset_name = str(self.page_preset._presets[idx].get("name", ""))
+        except Exception:
+            pass
+        benchmark_session.start(
+            preset_label=preset_name,
+            warmup_seconds=float(bench.get("warmup_seconds", 5)),
+        )
+
+    def _check_app_preset_profile(self) -> None:
+        if self.runner.is_running():
+            return
+        data = self._load_persisted_settings()
+        profiles = data.get("app_preset_profiles") or {}
+        if not isinstance(profiles, dict) or not profiles:
+            return
+        exe = (self._get_foreground_exe_name() or "").lower()
+        if not exe or exe == self._last_app_preset_exe:
+            return
+        preset_name = profiles.get(exe)
+        if not preset_name:
+            return
+        for preset in getattr(self.page_preset, "_presets", []):
+            if str(preset.get("name", "")).lower() == str(preset_name).lower():
+                self._last_app_preset_exe = exe
+                self._on_load_preset(preset)
+                self._show_status_toast(f"Loaded preset for {exe}: {preset_name}", icon="\U0001F4CC")
+                return
+
+    def _on_bind_preset_to_app(self, preset_name: str) -> None:
+        exe = (self._get_foreground_exe_name() or "").strip().lower()
+        if not exe:
+            self._show_status_toast("No foreground app detected", icon="\u26A0")
+            return
+        data = self._load_persisted_settings()
+        profiles = data.get("app_preset_profiles")
+        if not isinstance(profiles, dict):
+            profiles = {}
+        profiles[exe] = preset_name
+        data["app_preset_profiles"] = profiles
+        self._save_persisted_settings(data)
+        self._show_status_toast(f"Bound '{preset_name}' to {exe}", icon="\u2705")
