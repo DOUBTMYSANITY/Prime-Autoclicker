@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QFormLayout,
     QLabel,
+    QPushButton,
     QScrollArea,
     QSlider,
     QVBoxLayout,
@@ -15,6 +16,7 @@ from PyQt5.QtWidgets import (
 )
 
 from plugins.Phasmo.phasmo_settings import PhasmoSettings, save_settings
+from plugins.Phasmo.phasmo_fan_disclaimer import SHORT_DISCLAIMER, show_fan_content_disclaimer
 
 
 class PhasmoSettingsPage(QWidget):
@@ -154,6 +156,19 @@ class PhasmoSettingsPage(QWidget):
         self.compact_radius.sliderReleased.connect(self._commit_settings)
         lay.addWidget(QLabel("Corner radius"))
         lay.addWidget(self.compact_radius)
+
+        legal = QLabel("Fan content notice")
+        legal.setObjectName("PhasmoSectionTitle")
+        lay.addWidget(legal)
+        legal_copy = QLabel(SHORT_DISCLAIMER)
+        legal_copy.setObjectName("PhasmoToolCopy")
+        legal_copy.setWordWrap(True)
+        lay.addWidget(legal_copy)
+        legal_btn = QPushButton("View full Kinetic Games notice")
+        legal_btn.setObjectName("PhasmoToolButton")
+        legal_btn.setCursor(Qt.PointingHandCursor)
+        legal_btn.clicked.connect(lambda: show_fan_content_disclaimer(self))
+        lay.addWidget(legal_btn)
 
         lay.addStretch(1)
         scroll.setWidget(host)

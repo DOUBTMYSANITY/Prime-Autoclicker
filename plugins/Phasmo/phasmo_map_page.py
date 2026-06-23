@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from plugins.Phasmo.phasmo_fan_disclaimer import GAME_CREDIT, SHORT_DISCLAIMER
+
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
@@ -24,7 +26,9 @@ class PhasmoMapPage(QWidget):
         lay.addWidget(title)
 
         note = QLabel(
-            "Unofficial fan-made schematic map. Not affiliated with Kinetic Games.\n"
+            f"{GAME_CREDIT}\n"
+            f"{SHORT_DISCLAIMER}\n"
+            "Unofficial fan-made schematic map.\n"
             "Opens in your default browser for full interactivity."
         )
         note.setObjectName("PhasmoSub")

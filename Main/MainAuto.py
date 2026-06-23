@@ -156,8 +156,11 @@ def _run_phasmo_only() -> None:
     app = QApplication(sys.argv)
     from app.styling.themes import get_selected_theme_id
     from app.windows.phasmophobia_window import PhasmophobiaWindow
+    from plugins.Phasmo.phasmo_fan_disclaimer import show_phasmo_notice_if_needed
 
     win = PhasmophobiaWindow()
+    if not show_phasmo_notice_if_needed(win):
+        sys.exit(0)
     win.apply_theme(get_selected_theme_id())
     win.show()
     sys.exit(app.exec_())

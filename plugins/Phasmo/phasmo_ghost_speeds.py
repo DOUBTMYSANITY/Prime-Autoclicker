@@ -205,7 +205,8 @@ def ghosts_matching_speed(speed_mps: float, _ghost_entries: list | None = None) 
 
 
 def mps_to_bpm(speed_mps: float, multiplier_pct: float = 100.0) -> int:
+    """Expected tap BPM at lobby ghost-speed % for a canonical tier (100% baseline m/s)."""
     if speed_mps <= 0 or multiplier_pct <= 0:
         return 0
-    base = speed_mps / (multiplier_pct / 100.0)
-    return max(1, round(base * 60.0 / 0.85))
+    apparent = speed_mps * (multiplier_pct / 100.0)
+    return max(1, round(apparent * 60.0 / 0.85))

@@ -1,6 +1,22 @@
 # Unofficial Phasmophobia Reference
 
-Offline reference pack for an unofficial Phasmophobia-style guide layout. Not affiliated with Kinetic Games.
+*Phasmophobia* is a game by [Kinetic Games](https://www.kineticgames.co.uk/).
+
+Offline reference pack for an unofficial Phasmophobia-style guide layout. Fan-created content under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). **No save file editing** — that is a separate project ([PhasmoSaveEditor](../../../PhasmoSaveEditor/)).
+
+## Required disclaimer
+
+This third-party material, product or tool is an independent, non-commercial, not-for-profit project and is not affiliated with, endorsed by or sponsored by Kinetic Games.
+
+Any use of Kinetic Games' trademarks, logos, copyrighted materials or the 'Phasmophobia' brand is for descriptive and/or informational purposes only.
+
+Such use has not been authorised by Kinetic Games and does not constitute a licence, consent or waiver of Kinetic Games' rights, all of which are expressly reserved.
+
+Kinetic Games has not reviewed, assessed or approved this project and makes no representations or warranties as to its accuracy, quality, functionality, or fitness for purpose.
+
+The third-party material, product and/or tool comprised in this project is provided "as is". Use is at the end user's own risk and Kinetic Games shall have no liability arising out of or in connection with any person's reliance on, or use of, such project, material, product or tool.
+
+See also [PHASMOPHOBIA_FAN_CONTENT.md](../../../PHASMOPHOBIA_FAN_CONTENT.md).
 
 This version keeps the useful parts of the original idea in a local, readable format: evidence lookup, ghost-specific tells, hunt thresholds, and quick equipment notes.
 

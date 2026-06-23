@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from plugins.Phasmo.phasmo_fan_disclaimer import SHORT_DISCLAIMER
+
 EVIDENCE_NAMES = (
     "EMF 5",
     "Ultraviolet",
@@ -66,7 +68,7 @@ class PhasmoCompactWindow(QWidget):
         mark.setObjectName("CompactBrand")
         title = QLabel("UNOFFICIAL HUD")
         title.setObjectName("CompactTitle")
-        self.lbl_unofficial = QLabel("Fan reference · not affiliated with Kinetic Games")
+        self.lbl_unofficial = QLabel(SHORT_DISCLAIMER)
         self.lbl_unofficial.setObjectName("CompactSub")
         self.lbl_unofficial.setWordWrap(True)
         self.lbl_count = QLabel("0 ghosts")

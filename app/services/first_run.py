@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 _FLAG_FILE = Path.home() / ".mtautoclicker_first_run.json"
-_DISCLAIMER_VERSION = 1
+_DISCLAIMER_VERSION = 2
 
 
 def disclaimer_accepted() -> bool:
@@ -29,6 +29,8 @@ def show_first_run_disclaimer(parent) -> bool:
     """Show disclaimer dialog. Returns True if user may continue."""
     from PyQt5.QtWidgets import QMessageBox
 
+    from plugins.Phasmo.phasmo_fan_disclaimer import ABOUT_PHASMO_DISCLAIMER, GAME_CREDIT
+
     if disclaimer_accepted():
         return True
 
@@ -40,11 +42,14 @@ def show_first_run_disclaimer(parent) -> bool:
         "This software automates mouse and keyboard input.\n\n"
         "• Use responsibly and only where permitted.\n"
         "• Automation may violate third-party Terms of Service.\n"
-        "• Not affiliated with Mojang, Kinetic Games, or any game publisher.\n"
-        "• The Phasmophobia plugin is an unofficial fan reference — not endorsed by Kinetic Games.\n"
+        "• Not affiliated with Mojang or any game publisher.\n"
+        f"• {GAME_CREDIT}\n"
+        "• The Phasmophobia plugin is unofficial, non-commercial fan content — not endorsed by Kinetic Games.\n"
         "• Route Recorder can capture keystrokes — do not record while typing passwords.\n\n"
-        "You use this software at your own risk."
+        "You use this software at your own risk.\n\n"
+        "Click Show Details for the full Phasmophobia fan content notice from Kinetic Games."
     )
+    box.setDetailedText(ABOUT_PHASMO_DISCLAIMER)
     box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
     box.setDefaultButton(QMessageBox.Ok)
     if box.exec_() != QMessageBox.Ok:

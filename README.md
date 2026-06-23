@@ -74,9 +74,30 @@ python Main/MainAuto.py --phasmo-only
 
 ## Disclaimer
 
+### General (autoclicker)
+
 This software automates mouse and keyboard input. Use responsibly and only where permitted.
-Not affiliated with Mojang, Kinetic Games, or any game publisher. The Phasmophobia plugin is an **unofficial fan reference** — not endorsed by Kinetic Games.
 Automation may violate third-party Terms of Service — **use at your own risk**.
+
+Not affiliated with Mojang or any game publisher.
+
+### Phasmophobia fan content (Kinetic Games)
+
+*Phasmophobia* is a game by [Kinetic Games](https://www.kineticgames.co.uk/).
+
+The optional Phasmophobia reference plugin is **fan-created content** shared under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). It does **not** edit save files — see [PhasmoSaveEditor](../../PhasmoSaveEditor/) for that separate tool.
+
+This third-party material, product or tool is an independent, non-commercial, not-for-profit project and is not affiliated with, endorsed by or sponsored by Kinetic Games.
+
+Any use of Kinetic Games' trademarks, logos, copyrighted materials or the 'Phasmophobia' brand is for descriptive and/or informational purposes only.
+
+Such use has not been authorised by Kinetic Games and does not constitute a licence, consent or waiver of Kinetic Games' rights, all of which are expressly reserved.
+
+Kinetic Games has not reviewed, assessed or approved this project and makes no representations or warranties as to its accuracy, quality, functionality, or fitness for purpose.
+
+The third-party material, product and/or tool comprised in this project is provided "as is". Use is at the end user's own risk and Kinetic Games shall have no liability arising out of or in connection with any person's reliance on, or use of, such project, material, product or tool.
+
+See also [PHASMOPHOBIA_FAN_CONTENT.md](PHASMOPHOBIA_FAN_CONTENT.md).
 
 ## Third-party licenses
 

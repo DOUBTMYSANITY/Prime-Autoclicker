@@ -838,6 +838,10 @@ class MainWindow(QMainWindow):
     def _open_phasmophobia(self):
         """Open the Phasmophobia cheat-sheet window and hide the autoclicker."""
         try:
+            from plugins.Phasmo.phasmo_fan_disclaimer import show_phasmo_notice_if_needed
+
+            if not show_phasmo_notice_if_needed(self):
+                return
             if self._phasmophobia_window is None:
                 self._phasmophobia_window = PhasmophobiaWindow()
                 self._phasmophobia_window.go_back_to_autoclicker.connect(self._return_from_phasmophobia)

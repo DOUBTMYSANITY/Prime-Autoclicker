@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
 )
 
 from app.gui.widgets import Card, add_shadow
+from plugins.Phasmo.phasmo_fan_disclaimer import ABOUT_PHASMO_DISCLAIMER, show_fan_content_disclaimer
 
 _VERSION = "1.1.0"
 _DISCORD_URL = "https://discord.gg/nkQT7XCX"
@@ -188,13 +189,22 @@ class AboutPage(QWidget):
             ccl.addLayout(r)
 
         disclaimer = QLabel(
-            "Use automation responsibly. Not affiliated with Mojang, Kinetic Games, or any game publisher. "
-            "The Phasmophobia plugin is an unofficial fan reference — not endorsed by Kinetic Games. "
+            "Use automation responsibly. Not affiliated with Mojang or any game publisher. "
             "May violate third-party Terms of Service — use at your own risk."
         )
         disclaimer.setObjectName("HeroSub")
         disclaimer.setWordWrap(True)
         ccl.addWidget(disclaimer)
+        phasmo_disclaimer = QLabel(ABOUT_PHASMO_DISCLAIMER)
+        phasmo_disclaimer.setObjectName("HeroSub")
+        phasmo_disclaimer.setWordWrap(True)
+        ccl.addWidget(phasmo_disclaimer)
+        phasmo_notice_btn = QPushButton("Phasmophobia fan content notice")
+        phasmo_notice_btn.setCursor(Qt.PointingHandCursor)
+        phasmo_notice_btn.setObjectName("StartStopBtn")
+        phasmo_notice_btn.setFixedHeight(34)
+        phasmo_notice_btn.clicked.connect(lambda: show_fan_content_disclaimer(self))
+        ccl.addWidget(phasmo_notice_btn)
         ccl.addStretch(1)
         row1.addWidget(cc)
 

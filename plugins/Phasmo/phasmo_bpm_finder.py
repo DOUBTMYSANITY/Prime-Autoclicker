@@ -17,14 +17,20 @@ from PyQt5.QtWidgets import (
 
 from plugins.Phasmo.phasmo_ghost_speeds import format_speed_matches
 
-# Community formula: m/s = (BPM * 0.85 / 60) * speed_multiplier * (1 + offset%)
+# Community formula: apparent m/s from taps = (BPM * step_m / 60).
+# Lobby ghost-speed % scales footstep rate (150% = 1.5x faster taps). We divide
+# by that factor so tier tables (defined at 100%) still match.
 STEP_METERS = 0.85
 SPEED_MULTIPLIERS = (50, 75, 100, 125, 150)
 
 
 def bpm_to_mps(bpm: int, multiplier_pct: float = 100.0, offset_pct: float = 0.0) -> float:
-    base = (bpm * STEP_METERS) / 60.0
-    return base * (multiplier_pct / 100.0) * (1.0 + offset_pct / 100.0)
+    """Convert tapped BPM to normalized m/s for ghost tier matching at 100% baseline."""
+    if bpm <= 0 or multiplier_pct <= 0:
+        return 0.0
+    apparent = (bpm * STEP_METERS) / 60.0
+    normalized = apparent / (multiplier_pct / 100.0)
+    return normalized * (1.0 + offset_pct / 100.0)
 
 
 @dataclass
@@ -141,7 +147,7 @@ class BpmFinderOverlay(QWidget):
         self.lbl_matches.setStyleSheet("color: #d1d5db; font-size: 10px;")
         lay.addWidget(self.lbl_matches)
 
-        hint = QLabel("F = tap · R = reset")
+        hint = QLabel("F = tap · R = reset · % = lobby ghost speed (150% → ÷1.5 for match)")
         hint.setAlignment(Qt.AlignCenter)
         hint.setStyleSheet("color: #6b7280; font-size: 9px;")
         lay.addWidget(hint)

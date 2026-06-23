@@ -51,6 +51,7 @@ from plugins.Phasmo.phasmo_version import default_save_path, load_save, read_gam
 from plugins.Phasmo.phasmo_difficulty_builder import DifficultyBuilderPage, DifficultyState
 from plugins.Phasmo.phasmo_field_guide import FieldGuidePage
 from plugins.Phasmo.phasmo_map_page import PhasmoMapPage
+from plugins.Phasmo.phasmo_fan_disclaimer import SHORT_DISCLAIMER, show_fan_content_disclaimer
 
 
 @dataclass(frozen=True)
@@ -373,12 +374,13 @@ class PhasmophobiaWindow(QMainWindow):
         brand_row.addStretch(1)
         sb.addLayout(brand_row)
 
-        unofficial_note = QLabel(
-            "Unofficial fan reference tool. Not affiliated with or endorsed by Kinetic Games."
-        )
+        unofficial_note = QLabel(SHORT_DISCLAIMER)
         unofficial_note.setObjectName("PhasmoSupport")
         unofficial_note.setWordWrap(True)
         sb.addWidget(unofficial_note)
+
+        self.btn_fan_notice = PillButton("Fan Notice", "ℹ")
+        self.btn_fan_notice.clicked.connect(lambda: show_fan_content_disclaimer(self))
 
         self.btn_ghost_type = PillButton("Ghost Type", "👻")
         self.btn_field_guide = PillButton("Field Guide", "📖")
@@ -392,6 +394,7 @@ class PhasmophobiaWindow(QMainWindow):
         sb.addWidget(self.btn_difficulty)
         sb.addWidget(self.btn_maps)
         sb.addWidget(self.btn_settings)
+        sb.addWidget(self.btn_fan_notice)
         sb.addStretch(1)
         timer_hint = QLabel(
             "Overlays: Num1 Smudge · Num2 Crucifix · Num3 Obambo · Num4 Gamma · Num5 Brightness · F BPM · R reset"
