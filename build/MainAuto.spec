@@ -5,12 +5,6 @@ from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 ROOT = Path(SPECPATH).resolve().parent
 
-# Never bundle save-editor modules, caches, or copied game saves.
-_SAVE_EDITOR_MODULE_STEMS = frozenset({
-    "phasmo_save",
-    "phasmo_save_editor",
-    "phasmo_save_presets",
-})
 _EXCLUDED_DATA_SUFFIXES = frozenset({".pyc", ".pyo", ".pyd"})
 
 
@@ -18,17 +12,7 @@ def _is_excluded_plugin_data(path: Path, root: Path) -> bool:
     rel = path.relative_to(root)
     if "__pycache__" in rel.parts:
         return True
-    if path.suffix.lower() in _EXCLUDED_DATA_SUFFIXES:
-        return True
-    name = path.name
-    if name.startswith("SaveFile.txt"):
-        return True
-    if name.startswith("phasmo_cosmetics"):
-        return True
-    stem = path.stem.split(".", 1)[0]  # strip .cpython-314 from pyc stems
-    if stem in _SAVE_EDITOR_MODULE_STEMS:
-        return True
-    return False
+    return path.suffix.lower() in _EXCLUDED_DATA_SUFFIXES
 
 
 def _collect_tree(root: Path, prefix: str, *, filter_plugins: bool = False) -> list[tuple[str, str]]:
@@ -75,13 +59,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[
-        "games",
-        "plugins.Phasmo.phasmo_save",
-        "plugins.Phasmo.phasmo_save_editor",
-        "plugins.Phasmo.phasmo_save_presets",
-        "plugins.Phasmo.phasmo_version",
-    ],
+    excludes=["games"],
     noarchive=False,
     optimize=0,
 )

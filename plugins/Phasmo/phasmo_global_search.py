@@ -1,4 +1,4 @@
-"""Ctrl+K global search for ghosts and save fields."""
+"""Ctrl+K global search for ghosts."""
 from __future__ import annotations
 
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -36,7 +36,7 @@ class GlobalSearchDialog(QDialog):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(16, 16, 16, 16)
         lay.setSpacing(10)
-        hint = QLabel("Ghosts · save fields — type to filter, Enter to open")
+        hint = QLabel("Ghosts — type to filter, Enter to open")
         lay.addWidget(hint)
         self.input = QLineEdit()
         self.input.setPlaceholderText("Search…")
