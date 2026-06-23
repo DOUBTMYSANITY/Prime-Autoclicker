@@ -10,7 +10,6 @@ This file lists direct and notable transitive open-source components used by the
 | PyQt5 | GPL-3.0 | Desktop UI (Qt bindings) |
 | pynput | LGPL-3.0 | Global keyboard/mouse hooks and input simulation |
 | PyAutoGUI | BSD-3-Clause | Mouse click automation (`single_clicker`) |
-| cryptography | Apache-2.0 OR BSD-3-Clause | Read-only Phasmophobia save version detection |
 | numpy | BSD-3-Clause (and bundled sub-licenses) | Pulled in by PyAutoGUI / image stack |
 | Pillow | MIT-CMU | Image handling (PyAutoGUI dependency chain) |
 | psutil | BSD-3-Clause | CPU/memory display on Stats page |
@@ -31,8 +30,6 @@ Installed automatically with the packages above. Include these notices when dist
 | pytweening | MIT | PyAutoGUI |
 | PyQt5-Qt5 | LGPL-3.0 | PyQt5 (Qt runtime libraries) |
 | PyQt5_sip | BSD-2-Clause | PyQt5 |
-| cffi | MIT | cryptography |
-| pycparser | BSD-3-Clause | cffi |
 | WMI | MIT | screen_brightness_control (Windows) |
 
 Run `pip install pip-licenses && pip-licenses --format=markdown` after install for the full dependency tree in your environment.

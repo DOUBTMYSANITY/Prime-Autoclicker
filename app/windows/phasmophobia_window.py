@@ -36,7 +36,6 @@ from plugins.Phasmo.phasmo_compact_window import PhasmoCompactWindow
 from plugins.Phasmo.phasmo_data import (
     BEHAVIOR_FILTER_SPECS,
     MIMIC_FAKE_EVIDENCE,
-    SUPPORTED_VERSION,
     behavior_filter_match,
     forced_evidence_tell_lines,
     ghost_matches_evidence,
@@ -47,7 +46,6 @@ from plugins.Phasmo.phasmo_timer_overlays import PhasmoTimerOverlayManager
 from plugins.Phasmo.phasmo_settings import load_settings, save_settings
 from plugins.Phasmo.phasmo_settings_page import PhasmoSettingsPage
 from plugins.Phasmo.phasmo_timer_custom_ui import TimersCustomizePanel
-from plugins.Phasmo.phasmo_version import default_save_path, load_save, read_game_version_from_save
 from plugins.Phasmo.phasmo_difficulty_builder import DifficultyBuilderPage, DifficultyState
 from plugins.Phasmo.phasmo_field_guide import FieldGuidePage
 from plugins.Phasmo.phasmo_map_page import PhasmoMapPage
@@ -337,7 +335,6 @@ class PhasmophobiaWindow(QMainWindow):
         self._wire()
         self._refresh_matches()
         self._sync_sidebar_width()
-        self._refresh_version_banner()
         self._apply_plugin_settings(self._settings)
 
     def _build_ui(self):
@@ -441,12 +438,6 @@ class PhasmophobiaWindow(QMainWindow):
         top_bar.addWidget(self.btn_compact)
         content_lay.addWidget(self.drag_bar)
 
-        self.lbl_version_banner = QLabel("")
-        self.lbl_version_banner.setObjectName("PhasmoSupport")
-        self.lbl_version_banner.setWordWrap(True)
-        self.lbl_version_banner.hide()
-        content_lay.addWidget(self.lbl_version_banner)
-
         self.stack = AdaptiveStack()
         self.page_ghost_type = self._make_ghost_type_page()
         self._drag_surfaces.update({self.page_ghost_type})
@@ -490,8 +481,6 @@ class PhasmophobiaWindow(QMainWindow):
             "QFrame#GhostCard:hover { border: 1px solid #8A8A8A; background: #151515; }"
             "QFrame#PhasmoMapWrap { background: #0B0B0B; border: 1px solid #4B4B4B; border-radius: 20px; }"
             "QFrame#PhasmoGridWrap { background: #0B0B0B; border: 1px solid #4B4B4B; border-radius: 20px; }"
-            "QWidget#PhasmoSaveEditorPage { background: transparent; }"
-            "QWidget#PhasmoSaveEditorPage QFrame#PhasmoGridWrap { background: rgba(11, 11, 11, 0.7); }"
             "QPushButton#PhasmoMapButton { background: #0A0A0A; border: 1px solid #4D4D4D; border-radius: 10px; color: #FFFFFF; font-weight: 800; text-align: center; padding: 10px 16px; font-size: 12px; }"
             "QPushButton#PhasmoMapButton:hover { background: #1A1A1A; border: 1px solid #6A6A6A; }"
             "QLabel#PhasmoMapTitle { color: #FFFFFF; font-size: 22px; font-weight: 900; }"
@@ -1594,25 +1583,6 @@ class PhasmophobiaWindow(QMainWindow):
             chk.blockSignals(False)
         self._apply_evidence_enable_states()
         self._refresh_matches()
-
-    def _refresh_version_banner(self) -> None:
-        path = default_save_path()
-        version = None
-        if path.is_file():
-            try:
-                text, _iv, _plain = load_save(path)
-                version = read_game_version_from_save(text)
-            except Exception:
-                version = None
-        if version and version != SUPPORTED_VERSION:
-            self.lbl_version_banner.setText(
-                f"Save game version {version} differs from reference data ({SUPPORTED_VERSION}). "
-                "Ghost stats or overlays may be outdated for your build."
-            )
-            self.lbl_version_banner.setStyleSheet("color: #e09030; font-weight: 700;")
-            self.lbl_version_banner.show()
-        else:
-            self.lbl_version_banner.hide()
 
     def _on_overlay_hotkey(self, action: str) -> None:
         if action == "bpm_tap":

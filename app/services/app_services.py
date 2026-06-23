@@ -170,7 +170,7 @@ class AppServices:
             return False, f"Cloud sync failed: {exc}"
 
     def diagnostics(self) -> dict[str, Any]:
-        mods = ["PyQt5", "pynput", "pyautogui", "psutil", "numpy", "PIL", "cryptography", "screen_brightness_control"]
+        mods = ["PyQt5", "pynput", "pyautogui", "psutil", "numpy", "PIL", "screen_brightness_control"]
         module_state: dict[str, str] = {}
         for m in mods:
             try:

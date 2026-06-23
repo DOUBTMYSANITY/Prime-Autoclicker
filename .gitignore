@@ -38,6 +38,10 @@ mtautoclicker_*.json
 # Phasmophobia save copies (never commit — real save is in AppData)
 plugins/Phasmo/data/SaveFile.txt
 plugins/Phasmo/data/SaveFile.txt.*
+plugins/**/phasmo_save.py
+plugins/**/phasmo_save_editor.py
+plugins/**/phasmo_save_presets.py
+plugins/**/phasmo_cosmetics*.json
 **/SaveFile.txt
 **/SaveFile.txt.*
 

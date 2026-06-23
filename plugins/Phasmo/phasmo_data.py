@@ -1,8 +1,6 @@
 """Shared Phasmophobia cheat-sheet constants and filter helpers."""
 from __future__ import annotations
 
-SUPPORTED_VERSION = "0.17.1.5"
-
 STANDARD_EVIDENCE_SLOTS = 3
 MIMIC_FAKE_EVIDENCE = "Ghost Orbs"
 

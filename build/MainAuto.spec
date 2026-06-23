@@ -1,26 +1,64 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
-from PyInstaller.utils.hooks import collect_submodules, collect_all
+
+from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 ROOT = Path(SPECPATH).resolve().parent
 
-datas = []
+# Never bundle save-editor modules, caches, or copied game saves.
+_SAVE_EDITOR_MODULE_STEMS = frozenset({
+    "phasmo_save",
+    "phasmo_save_editor",
+    "phasmo_save_presets",
+})
+_EXCLUDED_DATA_SUFFIXES = frozenset({".pyc", ".pyo", ".pyd"})
+
+
+def _is_excluded_plugin_data(path: Path, root: Path) -> bool:
+    rel = path.relative_to(root)
+    if "__pycache__" in rel.parts:
+        return True
+    if path.suffix.lower() in _EXCLUDED_DATA_SUFFIXES:
+        return True
+    name = path.name
+    if name.startswith("SaveFile.txt"):
+        return True
+    if name.startswith("phasmo_cosmetics"):
+        return True
+    stem = path.stem.split(".", 1)[0]  # strip .cpython-314 from pyc stems
+    if stem in _SAVE_EDITOR_MODULE_STEMS:
+        return True
+    return False
+
+
+def _collect_tree(root: Path, prefix: str, *, filter_plugins: bool = False) -> list[tuple[str, str]]:
+    if not root.is_dir():
+        return []
+    out: list[tuple[str, str]] = []
+    for file_path in root.rglob("*"):
+        if not file_path.is_file():
+            continue
+        if filter_plugins and _is_excluded_plugin_data(file_path, root):
+            continue
+        dest = str(Path(prefix) / file_path.relative_to(root))
+        out.append((str(file_path), dest))
+    return out
+
+
+datas: list[tuple[str, str]] = []
 _plugins = ROOT / "plugins"
 _assets = ROOT / "assets"
-if _plugins.is_dir():
-    datas.append((str(_plugins), "plugins"))
-if _assets.is_dir():
-    datas.append((str(_assets), "assets"))
+datas += _collect_tree(_plugins, "plugins", filter_plugins=True)
+datas += _collect_tree(_assets, "assets", filter_plugins=False)
+
 _maps_cache = ROOT / "plugins" / "Phasmo" / "Maps" / "cache"
 if _maps_cache.is_dir():
-    datas.append((str(_maps_cache), "plugins/Phasmo/Maps/cache"))
-binaries = []
-hiddenimports = ["sip", "cryptography"]
+    datas += _collect_tree(_maps_cache, "plugins/Phasmo/Maps/cache", filter_plugins=True)
+
+binaries: list = []
+hiddenimports = ["sip"]
 hiddenimports += collect_submodules("app")
 hiddenimports += collect_submodules("plugins")
-hiddenimports += collect_submodules("cryptography.hazmat.backends")
-hiddenimports += collect_submodules("cryptography.hazmat.bindings.openssl")
-hiddenimports += ["_cffi_backend"]
 
 for pkg in ("PyQt5", "PyQt5_sip", "pyautogui", "pynput", "PIL", "numpy", "psutil", "screen_brightness_control"):
     tmp = collect_all(pkg)
@@ -37,7 +75,13 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["games"],
+    excludes=[
+        "games",
+        "plugins.Phasmo.phasmo_save",
+        "plugins.Phasmo.phasmo_save_editor",
+        "plugins.Phasmo.phasmo_save_presets",
+        "plugins.Phasmo.phasmo_version",
+    ],
     noarchive=False,
     optimize=0,
 )
