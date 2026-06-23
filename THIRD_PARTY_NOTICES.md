@@ -64,4 +64,3 @@ The following are **not** required for this project and are omitted from `requir
 ## External tools (not bundled)
 
 - **Phasmophobia fan content** — see [PHASMOPHOBIA_FAN_CONTENT.md](PHASMOPHOBIA_FAN_CONTENT.md) for the Kinetic Games fan creation notice.
-- **PhasmoSaveEditor** (`../../PhasmoSaveEditor/`) — save file editor only; separate project, not part of this release.

@@ -2,7 +2,7 @@
 
 *Phasmophobia* is a game by [Kinetic Games](https://www.kineticgames.co.uk/).
 
-Offline reference pack for an unofficial Phasmophobia-style guide layout. Fan-created content under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). **No save file editing** — that is a separate project ([PhasmoSaveEditor](../../../PhasmoSaveEditor/)).
+Offline reference pack for an unofficial Phasmophobia-style guide layout. Fan-created content under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). Reference only — does not edit or modify game files.
 
 ## Required disclaimer
 

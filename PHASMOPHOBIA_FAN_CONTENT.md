@@ -2,9 +2,7 @@
 
 *Phasmophobia* is a game by [Kinetic Games](https://www.kineticgames.co.uk/).
 
-The optional Phasmophobia reference plugin in Prime Autoclicker is **fan-created content** shared under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy).
-
-**Save file editing** is **not** included in this plugin. The [PhasmoSaveEditor](../../PhasmoSaveEditor/) project is kept separate.
+The optional Phasmophobia reference plugin in Prime Autoclicker is **fan-created content** shared under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). It is an offline reference guide only and does **not** edit or modify Phasmophobia game files.
 
 ## Required disclaimer
 

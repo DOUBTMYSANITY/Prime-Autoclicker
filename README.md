@@ -36,42 +36,6 @@ python Main/MainAuto.py
 python Main/MainAuto.py --phasmo-only
 ```
 
-## Optional environment variables
-
-| Variable | Purpose |
-|---|---|
-| `MTA_ADMIN_PASSWORD` | Password for the hidden admin panel |
-| `MTA_ADMIN_EASTER_EGG` | Optional code typed in the interval field to open the admin prompt (disabled if unset) |
-| `MTA_GITHUB_REPO` | GitHub repo for About link and update checker (`DOUBTMYSANITY/Prime-Autoclicker`) |
-| `MTA_BUNDLE_SIGNING_KEY` | HMAC key for signed profile import/export bundles |
-
-## Plugins (built-in)
-
-- **Unofficial Phasmophobia reference** — offline ghost guide, timers, Tanglewood map, field guide (no save editor; not affiliated with Kinetic Games)
-- **Route Recorder** — record/replay input routes (keyboard recording off by default)
-- **Input Humanization** — jitter, micro-pauses, fatigue curves in the click engine
-- **Preset Benchmark** — per-session smoothness / accuracy score
-
-## v1.1.0 highlights
-
-- First-run disclaimer dialog
-- System tray minimize + compact click HUD (click count)
-- Input Humanization wired into clicks
-- Preset Benchmark telemetry + toast summary
-- Per-app preset binding (Presets → **Bind to active app**)
-- Macro flow loops + JSON import/export
-- Color/pixel auto-stop trigger (Settings → Advanced)
-- Tanglewood map page in Phasmo plugin
-- GitHub release update notification
-- `--phasmo-only` standalone reference mode
-
-## Security
-
-- Plugins load from an **allowlist** in `app/services/plugin_system.py`
-- Profile bundles are **HMAC-signed** on export and verified on import
-- Admin easter-egg code is **not hardcoded** — set `MTA_ADMIN_EASTER_EGG` if you need it
-- Route Recorder keyboard capture defaults to **off** with an in-app warning
-
 ## Disclaimer
 
 ### General (autoclicker)
@@ -85,7 +49,7 @@ Not affiliated with Mojang or any game publisher.
 
 *Phasmophobia* is a game by [Kinetic Games](https://www.kineticgames.co.uk/).
 
-The optional Phasmophobia reference plugin is **fan-created content** shared under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). It does **not** edit save files — see [PhasmoSaveEditor](../../PhasmoSaveEditor/) for that separate tool.
+The optional Phasmophobia reference plugin is **fan-created content** shared under Kinetic Games' [Fan Creation Policy](https://www.kineticgames.co.uk/fan-creation-policy). It is an offline reference guide only and does **not** edit or modify Phasmophobia game files.
 
 This third-party material, product or tool is an independent, non-commercial, not-for-profit project and is not affiliated with, endorsed by or sponsored by Kinetic Games.
 
